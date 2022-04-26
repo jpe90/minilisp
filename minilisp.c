@@ -158,6 +158,17 @@ static Obj *acons(Obj *x, Obj *y, Obj *a) {
 }
 
 //======================================================================
+// Helper Functions
+//======================================================================
+
+// if we hit a delimeter, it's a number- return the number
+// if we hit a letter, it's an identifier, so we treat it as one
+
+int isdelimeter(int c) {
+    return (unsigned)c-'0' < 10;
+}
+
+//======================================================================
 // Parser
 //
 // This is a hand-written recursive-descendent parser.
@@ -248,10 +259,20 @@ static int read_number(int val) {
 
 #define SYMBOL_MAX_LEN 200
 
+static int append_to_identifier_buf(char *buf, int index) {
+    while (isalnum(peek()) || peek() == '-') {
+        if (SYMBOL_MAX_LEN <= index)
+            error("Symbol name too long");
+        buf[index++] = getchar();
+    }
+    buf[index] = '\0';
+}
+
 static Obj *read_symbol(char c) {
     char buf[SYMBOL_MAX_LEN + 1];
     int len = 1;
     buf[0] = c;
+    // move this while into a function that takes a pointer to a buf and an index to start appending
     while (isalnum(peek()) || peek() == '-') {
         if (SYMBOL_MAX_LEN <= len)
             error("Symbol name too long");
